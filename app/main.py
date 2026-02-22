@@ -34,6 +34,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title=APP_NAME, version=APP_VERSION, lifespan=lifespan)
 
+from viv_auth import init_auth
+init_auth(app, engine, Base, get_db, app_name=APP_NAME)
+
 # Include all route modules
 app.include_router(partners.router)
 app.include_router(jobs.router)
