@@ -35,7 +35,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title=APP_NAME, version=APP_VERSION, lifespan=lifespan)
 
 from viv_auth import init_auth
-init_auth(app, engine, Base, get_db, app_name=APP_NAME)
+User, require_auth = init_auth(app, engine, Base, get_db, app_name=APP_NAME)
 
 # Include all route modules
 app.include_router(partners.router)
@@ -199,7 +199,8 @@ DASHBOARD_HTML = """<!DOCTYPE html>
       <a href="/docs#/Commissions">Commissions</a>
       <a href="/docs#/Outreach%20Templates">Templates</a>
       <a href="/docs#/Analytics">Analytics</a>
-    </nav>
+      <a href="/auth/logout" class="nav-link" style="border-top:1px solid rgba(255,255,255,.1);padding-top:.75rem;margin-top:.5rem;color:#f87171">Logout</a>
+  </nav>
   </div>
 
   <div class="main">
@@ -357,7 +358,7 @@ loadDashboard();
 
 
 @app.get("/", response_class=HTMLResponse)
-def root_dashboard(request: Request, db: Session = Depends(get_db)):
+def root_dashboard(request: Request, db: Session = Depends(get_db), user=Depends(require_auth)):
     from app.models import Deal
     # Fetch data server-side to embed in HTML (no auth required for the dashboard view)
     dash_data = _dashboard_data(db=db, _="server")
